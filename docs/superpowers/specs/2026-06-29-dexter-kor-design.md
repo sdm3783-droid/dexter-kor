@@ -109,6 +109,32 @@ bun run dev
 
 ---
 
+## 데이터 저장소 — Firebase (dexter-kor 전용 프로젝트)
+
+**Firebase 프로젝트:** `dexter-kor` (기존 ske-0004 등과 완전 분리)
+
+**Firestore 구조:**
+```
+financial_statements/
+  {ticker}/
+    {year}/        ← 연도별 재무제표 (손익, 대차대조표, 현금흐름)
+
+stock_prices/
+  {ticker}/
+    {date}/        ← 일별 주가 (캐시, TTL 1일)
+
+news/
+  {ticker}/
+    {news_id}/     ← 뉴스/공시 (최근 30건)
+
+research_results/
+  {result_id}/     ← Dexter 분석 결과 전체 저장 (질문 + 답변 + 사용 도구)
+```
+
+**캐시 전략:** 재무제표는 1일 TTL, 주가는 장 종료 후 갱신, 뉴스는 1시간 TTL
+
+---
+
 ## 제약 사항
 
 - 포트: Korea Bridge는 `8000` 사용 (3000/8080 금지)
