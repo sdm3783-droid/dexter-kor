@@ -1,6 +1,7 @@
 ﻿from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sources.fdr import get_financial_statements, get_stock_price
+from sources.naver import get_news
 from firebase_client import get_cached, set_cached
 
 app = FastAPI(title="Korea Bridge", version="1.0.0")
@@ -14,6 +15,7 @@ app.add_middleware(
 
 TTL_FINANCIAL = 86400
 TTL_PRICE = 86400
+TTL_NEWS = 3600
 
 @app.get("/health")
 def health():
@@ -37,6 +39,16 @@ def stock_price(ticker: str, period: str = "1y"):
         return cached
     data = get_stock_price(ticker, period)
     set_cached("stock_prices", cache_key, data)
+    return data
+
+@app.get("/news/{ticker}")
+def news(ticker: str, limit: int = 10):
+    cache_key = f"news_{ticker}"
+    cached = get_cached("news", cache_key, TTL_NEWS)
+    if cached:
+        return cached
+    data = get_news(ticker, limit=limit)
+    set_cached("news", cache_key, data)
     return data
 
 if __name__ == "__main__":
